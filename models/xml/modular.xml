@@ -1,0 +1,60 @@
+<mujoco model="modular">
+
+  <!-- Assets -->
+  <include file="asset.xml"/>
+
+  <!-- Robot model -->
+  <worldbody>
+    <!-- Main body -->
+    <body name="main_body" pos="-0.015 0 0" quat="0.7071068 0 -0.7071068 0" gravcomp="1.0">
+      <site name="COM" pos="0 0 -2.4e-02" quat="0.7071068 0 0.7071068 0"/>
+      <geom class="PLA" type="mesh" mesh="main_body" rgba=".1 .1 .1 1"
+            contype="1" conaffinity="2"/>
+
+      <!-- Cap -->
+      <body name="cap" pos="0 0 0.001" quat="1 0 0 0" gravcomp="0.95">
+        <geom class="PLA" type="mesh" mesh="cap" rgba=".1 .1 .1 1"
+              contype="1" conaffinity="2"/>
+      </body>
+
+      <!-- Servo Motor -->
+      <body name="motor" pos="0 -0.017 -0.055" quat="0.7071068 0.7071068 0 0" gravcomp="0.95">
+        <geom class="PLA" type="mesh" mesh="motor" rgba=".5 .1 .1 1"
+              contype="2" conaffinity="1"/>
+        <!-- Paddle Arm -->
+        <body name="motor_paddle" pos="0.008 0.035 0" quat="0.7071068 0.7071068 0 0" gravcomp="0.95">
+          <joint name="motor_hinge" pos="0 0 0" axis= "0 0 1" range="-45 45"/>
+          <geom class="PLA" type="mesh" mesh="motor_paddle" rgba=".1 .1 .1 1"
+                contype="2" conaffinity="1"/>
+          <!-- Arm -->
+          <body name="flA" pos="-0.025 0 0.003" quat="1 0 0 0" gravcomp="0.95">
+            <geom class="PLA" type="mesh" mesh="flA" rgba=".1 .1 .1 1"
+                  contype="2" conaffinity="1"/>
+          </body>
+          <body name="flB" pos="-0.025 0 -0.003" quat="1 0 0 0" gravcomp="0.95">
+            <geom class="PLA" type="mesh" mesh="flB" rgba=".1 .1 .1 1"
+                  contype="2" conaffinity="1"/>
+          </body>
+          <!-- Paddle -->
+          <body name="paddle" pos="-0.0335 0.0015 0" quat="0.7071068 0 0 0.7071068" gravcomp="0.95">
+            <joint name="paddle_hinge" pos="0 0 0" axis= "0 0 1" range="0 45"/>
+            <geom class="PLA" type="mesh" mesh="paddle" rgba="0.02 0.5 0.46 1"
+                  contype="2" conaffinity="1"/>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- Sensor -->
+  <sensor>
+    <force name="module_force" site="COM"/>
+    <torque name="module_torque" site="COM"/>
+  </sensor>
+
+  <!-- Control -->
+  <actuator>
+    <general name="motor" joint="motor_hinge" gear="1"/>
+  </actuator>
+
+</mujoco>

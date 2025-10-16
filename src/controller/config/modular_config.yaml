@@ -1,0 +1,6 @@
+# File path
+mujoco_xml_path:                      "/home/twkim/ros2_ws/src/modular/models/xml/test.xml"
+
+# Number of modular robots
+N:    3
+

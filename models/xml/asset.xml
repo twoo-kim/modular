@@ -1,0 +1,26 @@
+<mujoco>   
+	<compiler angle="degree" meshdir="../meshes" autolimits="false"/>
+	<compiler autolimits="true"/>
+
+	<!-- Modular robot assets -->
+	<asset>
+		<mesh name="main_body" 		file="main_body.STL"/>
+		<mesh name="flA" 			file="flA.STL"/>
+		<mesh name="flB" 			file="flB.STL"/>
+		<mesh name="paddle" 		file="paddle.STL"/>
+		<mesh name="cap" 			file="cap.STL"/>
+		<mesh name="motor" 			file="motor.STL"/>
+		<mesh name="motor_paddle" 	file="motor_paddle.STL"/>
+	</asset>
+
+	<!-- Material feature -->
+	<default class="main">
+		<default class="PLA">
+			<geom density="1240" rgba=".1 .1 .1 1"/>
+		</default>
+		<default class="ABS">
+			<geom density="1100" rgba=".1 .1 .1 1"/>
+		</default>
+	</default>
+
+</mujoco>
