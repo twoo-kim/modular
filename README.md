@@ -2,7 +2,9 @@
 Modular robot simulation with MuJoCo
 
 ## Quick Start
-Go to the
+Currently without ROS2 connection, just mujoco. Install mujoco via ```pip install mujoco``` (https://github.com/google-deepmind/mujoco)
+
+Run
 ```
 git clone git@github.com:twoo-kim/modular.git
 cd src/controller/scripts
@@ -22,6 +24,10 @@ python3 test.py
 2. Python
     Currently applying the same input force to each modular robots
     Going to implement simulator code that receives multiple control inputs from each modular robot (```simulator.py``` and ```agent.py```)
+
+3. Fluid forces
+   https://mujoco.readthedocs.io/en/stable/computation/fluid.html
+   Mujoco just deals with fluid forces
 
 ## Future works
 1. Check the relation of angles of each joint with the real experiment results
