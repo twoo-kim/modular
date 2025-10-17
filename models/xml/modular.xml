@@ -7,7 +7,7 @@
   <worldbody>
     <!-- Main body -->
     <body name="main_body" pos="-0.015 0 0" quat="0.7071068 0 -0.7071068 0" gravcomp="1.0">
-      <site name="COM" pos="0 0 -2.4e-02" quat="0.7071068 0 0.7071068 0"/>
+      <site name="COM" pos="0 0 -2.4e-2" quat="0.7071068 0 0.7071068 0" rgba=".1 .5 .1 1"/>
       <geom class="PLA" type="mesh" mesh="main_body" rgba=".1 .1 .1 1"
             contype="1" conaffinity="2"/>
 
@@ -22,8 +22,8 @@
         <geom class="PLA" type="mesh" mesh="motor" rgba=".5 .1 .1 1"
               contype="2" conaffinity="1"/>
         <!-- Paddle Arm -->
-        <body name="motor_paddle" pos="0.008 0.035 0" quat="0.7071068 0.7071068 0 0" gravcomp="0.95">
-          <joint name="motor_hinge" pos="0 0 0" axis= "0 0 1" range="-45 45"/>
+        <body name="motor_paddle" pos="0.008 0.035 0" quat="-0.5 -0.5 -0.5 0.5" gravcomp="0.95">
+          <joint name="motor_hinge" pos="0 0 0" axis= "0 0 -1" range="-0.7854 0.7854" limited="true"/>
           <geom class="PLA" type="mesh" mesh="motor_paddle" rgba=".1 .1 .1 1"
                 contype="2" conaffinity="1"/>
           <!-- Arm -->
@@ -36,8 +36,9 @@
                   contype="2" conaffinity="1"/>
           </body>
           <!-- Paddle -->
-          <body name="paddle" pos="-0.0335 0.0015 0" quat="0.7071068 0 0 0.7071068" gravcomp="0.95">
-            <joint name="paddle_hinge" pos="0 0 0" axis= "0 0 1" range="0 45"/>
+          <body name="paddle" pos="-0.0335 0.0015 0" quat="0.5555702 0 0 0.8314696" gravcomp="0.95">
+            <joint  name="paddle_hinge" pos="0 0 0" axis= "0 0 1" range="-0.3927 0.3927" limited="true"
+                    solreflimit="1e-3 1" solimplimit=".95 .99 1e-3"/>
             <geom class="PLA" type="mesh" mesh="paddle" rgba="0.02 0.5 0.46 1"
                   contype="2" conaffinity="1"/>
           </body>
@@ -54,7 +55,7 @@
 
   <!-- Control -->
   <actuator>
-    <general name="motor" joint="motor_hinge" gear="1"/>
+    <position name="motor_pos" joint="motor_hinge" kp="10" kv=".05"/>
   </actuator>
 
 </mujoco>

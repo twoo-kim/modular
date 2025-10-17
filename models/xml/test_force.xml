@@ -1,0 +1,52 @@
+<mujoco model="modular">
+
+  <!-- Environment --> 
+  <option timestep="0.001" gravity="0 0 0" integrator="implicit" density="1025" viscosity="0.001" iterations="50" solver="Newton"/>
+  <include file="environment.xml"/>
+  
+  <!-- Force sensor asset -->
+  <include file="asset.xml"/>
+  <asset>
+    <mesh name="force_sensor" 	file="force_sensor.STL"/>
+  </asset>
+
+  <!-- Robot model -->
+  <worldbody>
+    <!-- Force sensor -->
+    <body name="force_sensor" pos="0 0 0.5">
+      <site name="COM" pos="0 0 0.015" quat="0 1 0 0"/>
+      <geom class="metal" type="mesh" mesh="force_sensor" rgba=".1 .1 .1 1"/>
+
+      <!-- Paddle Arm -->
+      <body name="motor_paddle" pos="-0.055 0 -0.105" quat="0.2705967 0.653282 0.2705967 0.653282">
+        <joint name="motor_hinge" pos="0 0 0" axis= "0 0 1" range="-0.7854 0.7854" limited="true"/>
+        <geom class="PLA" type="mesh" mesh="motor_paddle" rgba=".1 .1 .1 1"/>
+        <!-- Arm -->
+        <body name="flA" pos="-0.025 0 0.003" quat="1 0 0 0">
+          <geom class="PLA" type="mesh" mesh="flA" rgba=".1 .1 .1 1"/>
+        </body>
+        <body name="flB" pos="-0.025 0 -0.003" quat="1 0 0 0">
+          <geom class="PLA" type="mesh" mesh="flB" rgba=".1 .1 .1 1"/>
+        </body>
+        <!-- Paddle -->
+        <body name="paddle" pos="-0.0335 0.0015 0" quat="0.5555702 0 0 0.8314696">
+          <joint  name="paddle_hinge" pos="0 0 0" axis= "0 0 1" range="-0.3927 0.3927" limited="true"
+                  solreflimit="1e-3 1" solimplimit=".95 .99 1e-3"/>
+          <geom class="PLA" type="mesh" mesh="paddle" rgba="0.02 0.5 0.46 1"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- Entire colony wrench -->
+  <sensor>
+    <force name="force" site="COM"/>
+    <torque name="torque" site="COM"/>
+  </sensor>
+
+  <!-- Control -->
+  <actuator>
+    <position name="motor_pos" joint="motor_hinge" kp="5" kv=".1"/>
+  </actuator>
+
+</mujoco>

@@ -1,5 +1,5 @@
 <mujoco>   
-	<compiler angle="degree" meshdir="../meshes" autolimits="false"/>
+	<compiler angle="radian" meshdir="../meshes" autolimits="false"/>
 	<compiler autolimits="true"/>
 
 	<!-- Modular robot assets -->
@@ -21,6 +21,10 @@
 		<default class="ABS">
 			<geom density="1100" rgba=".1 .1 .1 1"/>
 		</default>
+		<default class="metal">
+			<geom density="20000" rgba=".1 .1 .1 1"/>
+		</default>
+		
 	</default>
 
 </mujoco>

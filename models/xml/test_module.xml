@@ -9,12 +9,18 @@
     <model name="modbot" file="modular.xml"/>
   </asset>
 
+  <!-- Initial configuration -->
+  <keyframe>
+    <key name="init_pose"
+         qpos="0.0 0.0 0.5 1.0 0.0 0.0 0.0 0.7854 -0.3926 0.7854 -0.3926 0.7854 -0.3926"/>
+  </keyframe>
+
   <!-- Robot model -->
   <worldbody>
     <!-- Colony -->
     <body name="colony" pos="0 0 0.5">
       <site name="COM" pos="0 0 0" quat="1 0 0 0"/>
-      <!-- <joint name="base" type="free"/> -->
+      <joint name="base" type="free"/>
 
       <!-- Robot 1 -->
       <body name="bot1" pos="0 -0.05 0" quat="1 0 0 0">
@@ -22,14 +28,14 @@
       </body>
       
       <!-- Robot 2 -->
-      <!-- <body name="bot2" pos="0.03 -0.01 0" quat="0.5 0 0 0.8660254">
+      <body name="bot2" pos="0.03 -0.01 0" quat="0.5 0 0 0.8660254">
         <attach model="modbot" body="main_body" prefix="r2_"/>
-      </body> -->
+      </body>
 
       <!-- Robot 3 -->
-      <!-- <body name="bot3" pos="-0.02 0 0" quat="0.5 0 0 -0.8660254">
+      <body name="bot3" pos="-0.02 0 0" quat="0.5 0 0 -0.8660254">
         <attach model="modbot" body="main_body" prefix="r3_"/>
-      </body> -->
+      </body>
     </body>
   </worldbody>
 
