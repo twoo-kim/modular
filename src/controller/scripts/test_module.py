@@ -10,7 +10,9 @@ import matplotlib.pyplot as plt
 # Open model
 script_dir = os.path.dirname(os.path.abspath(__file__))
 relative_path_to_model = os.path.join(script_dir, '../../../models/xml/test_force.xml')
-model = os.path.abspath(relative_path_to_model)
+model_path = os.path.abspath(relative_path_to_model)
+
+model = mujoco.MjModel.from_xml_path(model_path)
 data = mujoco.MjData(model)
 i = 0
 
