@@ -3,12 +3,14 @@ import mujoco
 import mujoco.viewer
 import math
 import time
-
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Open model
-model = mujoco.MjModel.from_xml_path("/home/twkim/ros2_ws/src/modular/models/xml/test_module.xml")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+relative_path_to_model = os.path.join(script_dir, '../../../models/xml/test_force.xml')
+model_path = os.path.abspath(relative_path_to_model)
 data = mujoco.MjData(model)
 i = 0
 
