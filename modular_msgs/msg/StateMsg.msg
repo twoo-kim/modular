@@ -1,16 +1,18 @@
 std_msgs/Header header
 
-string[] names
+# List of the index
+int32[] index
 
-# Floating base
-geometry_msgs/Pose[] base_pose
-geometry_msgs/Twist[] base_twist
-geometry_msgs/Twist[] base_accel
+# List of the geometric properties of each module
+geometry_msgs/Pose[] pose
+geometry_msgs/Twist[] twist
 
-# Joint
-string[] joint_names
-float64[] joint_pos
-float64[] joint_vel
+# Value of the joint of each module
+float64[] joint_motor
+float64[] joint_paddle
 
-# Phase
-float64 phase
+# Force applied to its COM for each module
+geometry_msgs/Vector3[] force
+
+# List of the phase of each module
+float64[] phase

@@ -3,6 +3,7 @@ project(modular_msgs)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Release) # Release, RelWithDebInfo, Debug
 
 find_package(ament_cmake REQUIRED)
 find_package(std_msgs REQUIRED)

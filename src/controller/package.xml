@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>modular_sync</name>
+  <name>modular</name>
   <version>0.0.0</version>
   <description>The modular robot synchronization</description>
 
@@ -14,11 +14,9 @@
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>am_msgs</depend>
+  <depend>modular_msgs</depend>
 
   <!-- Other libraries -->
-  <depend>pinocchio</depend>
   <depend>eigen3_cmake_module</depend>
 
   <!-- Python -->

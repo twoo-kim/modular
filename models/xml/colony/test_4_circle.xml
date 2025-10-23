@@ -1,0 +1,31 @@
+<mujoco model="modular">
+  <option timestep="0.001" gravity="0 0 0" integrator="implicit" density="1025" viscosity="0.001" iterations="50" solver="Newton"/>
+  <include file="environment.xml"/>
+  <asset>
+    <model name="modbot" file="modular.xml"/>
+  </asset>
+  <worldbody>
+    <body name="colony" pos="0 0 0.5">
+    <site name="COM" pos="0 0 0"/>
+    <joint name="base" type="free"/>
+		<body name="bot1" pos="0.15 0 0" quat="0.707107 0 0 0.707107">
+			<attach model="modbot" body="main_body" prefix="r1_"/>
+		</body>
+		<body name="bot2" pos="9.18485e-18 0.15 0" quat="6.12323e-17 0 0 1">
+			<attach model="modbot" body="main_body" prefix="r2_"/>
+		</body>
+		<body name="bot3" pos="-0.15 1.83697e-17 0" quat="-0.707107 0 0 0.707107">
+			<attach model="modbot" body="main_body" prefix="r3_"/>
+		</body>
+		<body name="bot4" pos="-2.75546e-17 -0.15 0" quat="1 0 0 -1.11022e-16">
+			<attach model="modbot" body="main_body" prefix="r4_"/>
+		</body>
+
+    </body>
+  </worldbody>
+
+  <sensor>
+    <force  name="colony_force"  site="COM"/>
+    <torque name="colony_torque" site="COM"/>
+  </sensor>
+</mujoco>

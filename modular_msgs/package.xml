@@ -2,7 +2,7 @@
 <package format="3">
   <name>modular_msgs</name>
   <version>0.0.0</version>
-  <description>Custom messages for am_controller</description>
+  <description>Custom messages for modular system</description>
 
   <maintainer email="twkim@todo.todo">twkim</maintainer>
   <license>MIT</license>

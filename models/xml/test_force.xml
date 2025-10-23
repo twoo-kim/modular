@@ -14,11 +14,11 @@
   <worldbody>
     <!-- Force sensor -->
     <body name="force_sensor" pos="0 0 0.5">
-      <site name="COM" pos="0 0 0.015" quat="0 1 0 0"/>
+      <site name="COM" pos="0 0 0.015" quat="1 0 0 0"/>
       <geom class="metal" type="mesh" mesh="force_sensor" rgba=".1 .1 .1 1"/>
 
       <!-- Paddle Arm -->
-      <body name="motor_paddle" pos="-0.055 0 -0.105" quat="0.2705967 0.653282 0.2705967 0.653282">
+      <body name="motor_paddle" pos="-0.055 0 -0.105" quat="0.5 0.5 0.5 0.5">
         <joint name="motor_hinge" pos="0 0 0" axis= "0 0 1" range="-0.7854 0.7854" limited="true"/>
         <geom class="PLA" type="mesh" mesh="motor_paddle" rgba=".1 .1 .1 1"/>
         <!-- Arm -->
@@ -29,10 +29,11 @@
           <geom class="PLA" type="mesh" mesh="flB" rgba=".1 .1 .1 1"/>
         </body>
         <!-- Paddle -->
-        <body name="paddle" pos="-0.0335 0.0015 0" quat="0.5555702 0 0 0.8314696">
-          <joint  name="paddle_hinge" pos="0 0 0" axis= "0 0 1" range="-0.3927 0.3927" limited="true"
-                  solreflimit="1e-3 1" solimplimit=".95 .99 1e-3"/>
-          <geom class="PLA" type="mesh" mesh="paddle" rgba="0.02 0.5 0.46 1"/>
+        <body name="paddle" pos="-0.0335 0.0015 0" quat="0.7071068 0 0 0.7071068">
+          <joint  name="paddle_hinge" pos="0 0 0" axis= "0 0 1" range="0 0.7854" limited="true"
+                  solreflimit="1e-3 1" solimplimit=".98 .99 1e-2"/>
+          <geom class="PLA" type="mesh" mesh="paddle" rgba="0.02 0.5 0.46 1"
+                fluidshape="ellipsoid" fluidcoef="1.0 0.5 1.5 1.7 1.0"/>
         </body>
       </body>
     </body>
