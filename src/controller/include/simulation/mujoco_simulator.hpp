@@ -20,10 +20,8 @@
 /* Mujoco Simulator Class */
 class MujocoSimulator : public rclcpp::Node {
 public:
-  // Constructor
+  // Constructor and Destructor
   MujocoSimulator();
-
-  // Destructor
   ~MujocoSimulator();
 
   // Run one step
@@ -40,8 +38,8 @@ private:
   SimConfig config_;
 
   // Mujoco
-  mjModel* model_ = nullptr;
-  mjData* data_ = nullptr;
+  mjModel* model_{nullptr};
+  mjData* data_{nullptr};
   
   // Viewer
   std::unique_ptr<MujocoViewer> viewer_;

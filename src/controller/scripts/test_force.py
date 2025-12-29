@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Open model
-<<<<<<< HEAD
 script_dir = os.path.dirname(os.path.abspath(__file__))
 relative_path_to_model = os.path.join(script_dir, '../../../models/xml/test_force.xml')
 model_path = os.path.abspath(relative_path_to_model)
@@ -18,9 +17,6 @@ model_path = os.path.abspath(relative_path_to_model)
 model = mujoco.MjModel.from_xml_path(model_path)
 data = mujoco.MjData(model)
 i = 0
-=======
-model = mujoco.MjModel.from_xml_path("/home/twkim/ros2_ws/src/modular/models/xml/test_force.xml")
->>>>>>> cedb6d0 (simulation node with circular colony)
 
 ############################### Simulation Parameter ###############################
 step = 0.001        # s (if change this value, change xml timestep also)

@@ -1,4 +1,4 @@
-#include "simulation/simulator.hpp"
+#include "simulation/mujoco_simulator.hpp"
 using std::placeholders::_1;
 
 MujocoSimulator::MujocoSimulator() : rclcpp::Node("mujoco_simulator") {
@@ -31,7 +31,9 @@ MujocoSimulator::MujocoSimulator() : rclcpp::Node("mujoco_simulator") {
   }
 
   // Viewer
-  viewer_ = std::make_unique<MujocoViewer>(model_, data_, config_.width, config_.height, "Mujoco");
+  if (config_.visualize) {
+    viewer_ = std::make_unique<MujocoViewer>(model_, data_, config_.width, config_.height, "Mujoco");
+  }
 
   // Identify modules
   modules_ = getModules();
@@ -61,10 +63,10 @@ void MujocoSimulator::controlCallback(const modular_msgs::msg::ControlMsg::Share
   const int m_id = msg->index;
   
   // Find module
-  for (auto &elem: modules_) {
-    int id = elem.module_id;
+  for (auto &m: modules_) {
+    int id = m.module_id;
     if (id == m_id) {
-      int a_id = elem.aid_motor;
+      int a_id = m.aid_motor;
       if (a_id >= 0 && a_id < model_->nu) {
         // Get control and allocate value to the corresponding control list
         data_->ctrl[a_id] = msg->ctrl;
@@ -72,7 +74,7 @@ void MujocoSimulator::controlCallback(const modular_msgs::msg::ControlMsg::Share
         RCLCPP_ERROR(get_logger(), "Invalid actuator id %d with module id %d", a_id, m_id);
       }
       // Get internal phase
-      elem.phi = msg->phi;
+      m.phi = msg->phi;
       break;
     }
   }
@@ -127,8 +129,10 @@ void MujocoSimulator::run() {
   publishPose();
 
   // 3. Render
-  viewer_->render();
-  viewer_->pollEvents();
+  if (config_.visualize) {
+    viewer_->render();
+    viewer_->pollEvents();
+  }
 }
 
 static bool checkPrefix(const std::string &s) {

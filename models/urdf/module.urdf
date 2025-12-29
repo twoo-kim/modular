@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<robot name="module">
+
+  <!-- Main Body -->
+  <link name="main_body_link">
+    <inertial>
+      <origin xyz="0 0.003263 -0.024012" rpy="0 0 0"/>
+      <mass value = "0.0508654"/>
+      <inertia
+        ixx="3.2369E-05"
+        ixy="-5.1865E-08"
+        ixz="6.2298E-08"
+        iyy="3.8892E-05"
+        iyz="1.5562E-06"
+        izz="3.8330E-05"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/main_body.STL"/>
+      </geometry>
+      <material name="grey">
+        <color rgba=".1 .1 .1 1"/>
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/main_body.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Cap (fixed) -->
+  <link name="cap_link">
+    <inertial>
+      <origin xyz="0 0 0.002584" rpy="0 0 0"/>
+      <mass value = "0.0207453"/>
+      <inertia
+        ixx="5.2686E-06"
+        ixy="2.2073E-12"
+        ixz="-4.2054E-12"
+        iyy="5.8008E-06"
+        iyz="8.3798E-12"
+        izz="1.0095E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/cap.STL"/>
+      </geometry>
+      <material name="grey">
+        <color rgba=".1 .1 .1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/cap.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <!-- Motor (fixed) -->
+  <link name="motor_link">
+    <inertial>
+      <origin xyz="0.000583 0.013451 0" rpy="0 0 0"/>
+      <mass value = "0.0180991"/>
+      <inertia
+        ixx="1.7385E-06"
+        ixy="-6.0293E-09"
+        ixz="-2.8041E-10"
+        iyy="1.8742E-06"
+        iyz="-3.9561E-11"
+        izz="2.9658E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/motor.STL"/>
+      </geometry>
+      <material name="red">
+        <color rgba=".5 .1 .1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/motor.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="main_body_to_cap" type="fixed">
+    <origin xyz="0 0 0.001" rpy="0 0 0"/>
+    <parent link="main_body_link"/>
+    <child link="cap_link"/>
+  </joint>
+  <joint name="main_body_to_motor" type="fixed">
+    <origin xyz="0 -0.017 -0.055" rpy="1.57079632679 0 0"/>
+    <parent link="main_body_link"/>
+    <child link="motor_link"/>
+  </joint>
+
+  <!-- Motor paddle (revolute hinge) -->
+  <link name="motor_paddle_link">
+    <inertial>
+      <origin xyz="-0.00442 -0.000212 0" rpy="0 0 0"/>
+      <mass value = "0.000425108"/>
+      <inertia
+        ixx="2.9604E-09"
+        ixy="1.1351E-10"
+        ixz="-4.1107E-26"
+        iyy="1.4476E-08"
+        iyz="5.9011E-26"
+        izz="1.7153E-08" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/motor_paddle.STL"/>
+      </geometry>
+      <material name="grey">
+        <color rgba=".1 .1 .1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/motor_paddle.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="motor_hinge" type="revolute">
+    <origin xyz="0.008 0.035 0" rpy="1.57079632679 0 0"/>
+    <axis xyz=" 0 0 1"/>
+    <limit lower="-0.7854" upper="0.7854" effort="1.0" velocity="10.0"/>
+    <parent link="motor_link"/>
+    <child link="motor_paddle_link"/>
+    <dynamics damping="1e-4"/>
+  </joint>
+
+  <!-- flA, flB (fixed) -->
+  <link name="flA_link">
+    <inertial>
+      <origin xyz="0.001618 0.001988 -0.000278" rpy="0 0 0"/>
+      <mass value = "0.0175588"/>
+      <inertia
+        ixx="4.1751E-08"
+        ixy="1.0291E-08"
+        ixz="2.1462E-09"
+        iyy="1.2538E-07"
+        iyz="1.0233E-09"
+        izz="1.6320E-07" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/flA.STL"/>
+      </geometry>
+      <material name="grey">
+        <color rgba=".1 .1 .1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/flA.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="flB_link">
+    <inertial>
+      <origin xyz="0.001618 0.001988 0.000278" rpy="0 0 0"/>
+      <mass value = "0.017588"/>
+      <inertia
+        ixx="4.1751E-08"
+        ixy="1.0291E-08"
+        ixz="-2.1462E-09"
+        iyy="1.2538E-07"
+        iyz="-1.0233E-09"
+        izz="1.6320E-07" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/flB.STL"/>
+      </geometry>
+      <material name="grey">
+        <color rgba=".1 .1 .1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/flB.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="motor_paddle_to_flA" type="fixed">
+    <origin xyz="-0.025 0 0.003" rpy="0 0 0"/>
+    <parent link="motor_paddle_link"/>
+    <child link="flA_link"/>
+  </joint>
+  <joint name="motor_paddle_to_flB" type="fixed">
+    <origin xyz="-0.025 0 -0.003" rpy="0 0 0"/>
+    <parent link="motor_paddle_link"/>
+    <child link="flB_link"/>
+  </joint>
+
+  <!-- Paddle (revolute hinge) -->
+  <link name="paddle_link">
+    <inertial>
+      <origin xyz="0.001281 0.029867 0" rpy="0 0 0"/>
+      <mass value = "0.00849369"/>
+      <inertia
+        ixx="4.2957E-06"
+        ixy="3.0329E-08"
+        ixz="1.9701E-22"
+        iyy="1.9992E-06"
+        iyz="-3.8433E-22"
+        izz="2.7663E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/paddle.STL"/>
+      </geometry>
+      <material name="mint">
+        <color rgba="0.02 0.5 0.46 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!-- <box size="0.001 0.001 0.001"/> -->
+        <mesh filename="meshes/paddle.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="paddle_hinge" type="revolute">
+    <origin xyz="-0.0335 0.0015 0" rpy="0 0 1.96349539694"/>
+    <axis xyz=" 0 0 1"/>
+    <limit lower="-0.3927" upper="0.3927" effort="1.0" velocity="10.0"/>
+    <parent link="motor_paddle_link"/>
+    <child link="paddle_link"/>
+    <dynamics damping="1e-4"/>
+  </joint>
+
+</robot>
+

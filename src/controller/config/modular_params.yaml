@@ -1,20 +1,39 @@
 # File path directory
-mujoco_xml_dir:  "/home/twkim/ros2_ws/src/modular/models/xml/"
+mujoco_xml_dir:   "/home/twkim/ros2_ws/src/modular/models/xml/"
+urdf_dir:         "/home/twkim/ros2_ws/src/modular/models/urdf/"
 
 # Interface configuration
 width:            1500
 height:           1000
+visualize:        false
 
-# ===== User Settings =====
-N:                10                 # Number of agents/bots
-RADIUS:           0.15              # [m] Radius of the circle (agents placed at equal intervals)
+# Set which module actuator to activate
+is_activate:      [true, true, true, true]
+
+# ===== Colony settings ====
+N:                2                 # Number of agents/bots
+RADIUS:           0.05              # [m] Radius of the circle (agents placed at equal intervals)
 FACE_RADIAL:      true              # True: Agents face outwards (radial direction)
 YAW_OFFSET_DEG:   0.0               # Fine adjustment of yaw for all agents (degrees)
 ADD_DUMMY_MASS:   false             # Add dummy mass to the colony
 
-FREQUENCY:        2.0               # [rad/s] Base angular velocity (= 2 Hz)
 KAPPA:            0.5               # κ: Sensor coefficient gain
 MIN_DELPHI:       0.1               # Lower limit for φ̇ (to prevent stopping)
 HEADLESS:         false
-SIM_TIME:         10.0              # Used only when HEADLESS is True
+
+SIM_TIME:         4
+TIME_STEP:        0.001             # One time step length 0.001s
+# =========================
+
+# Fluid dynamic coefficients
+Cn:               1.5
+rho:              1025
+viscosity:        0.001
+
+# PD actuator controller gain
+P_gain:           1
+D_gain:           0.01
+
+# for integration method; if false, use RK4 method
+isEuler:          false
 

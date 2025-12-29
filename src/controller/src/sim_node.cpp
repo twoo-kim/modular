@@ -1,4 +1,4 @@
-#include "simulation/simulator.hpp"
+#include "simulation/mujoco_simulator.hpp"
 
 /* Main node */
 int main(int argc, char** argv) {

@@ -1,9 +1,26 @@
 #pragma once
 #include <vector>
 #include <Eigen/Dense>
+#include <mujoco/mujoco.h>
 #include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/quaternion.hpp"
 #include "geometry_msgs/msg/vector3.hpp"
+
+// Utiltiy functions that converts mjNum and Eigen
+inline Eigen::VectorXd toEigen(const mjtNum *arr, int n) {
+  Eigen::VectorXd v(n);
+  for (int i = 0; i < n; ++i) {
+    v[i] = static_cast<double>(arr[i]);
+  }
+  return v;
+}
+
+inline void toMj(const Eigen::VectorXd &v, mjtNum *arr) {
+  const int n = v.size();
+  for (int i = 0; i < n; ++i) {
+    arr[i] = static_cast<mjtNum>(v[i]);
+  }
+}
 
 // Check if element x is contained in the vector v
 template <typename T>

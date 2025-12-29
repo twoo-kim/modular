@@ -9,12 +9,20 @@ import matplotlib.pyplot as plt
 
 # Open model
 script_dir = os.path.dirname(os.path.abspath(__file__))
-relative_path_to_model = os.path.join(script_dir, '../../../models/xml/test_force.xml')
+relative_path_to_model = os.path.join(script_dir, '../../../models/xml/test_module.xml')
 model_path = os.path.abspath(relative_path_to_model)
 
 model = mujoco.MjModel.from_xml_path(model_path)
 data = mujoco.MjData(model)
 i = 0
+
+# Print mass
+# for i in range(model.nbody):
+#   name = model.body(i).name
+#   mass = model.body_mass[i]
+#   # pose = data.xpos[i]
+#   print(f"{i:2d}  {name:20s}  mass = {mass}")
+#   # print(f"{i:2d}  {name:20s}  pos = {pose}")
 
 # Get initial configuration
 key_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_KEY, "init_pose")
@@ -26,6 +34,8 @@ robot_ids = []
 motor_ids = []
 paddle_ids = []
 sensor_ids = []
+colony_id = model.body(name="colony").id
+
 for j in range(model.nbody):
     name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, j)
     if 'colony' or 'bot' in name:
@@ -48,8 +58,13 @@ ang_motor = {}
 ang_paddle = {}
 force = {}
 orientation = {}
+position = {'x':[], 'y':[], 'z':[]}
 t = []
 step = 0.001
+sim_time = 4.0
+
+freq = 0.5
+omega = 2*math.pi*freq*step
 
 def quaternion_to_matrix(q):
     w, x, y, z = q
@@ -63,11 +78,14 @@ def quaternion_to_matrix(q):
         [2*(x*z - y*w),           2*(y*z + x*w),       1 - 2*(x**2 + y**2)]
     ])
 
+# Initial position
+init_pos = data.xpos[colony_id].copy()
+
 ###############################  Run simulation  ###############################
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
         # Control; currently simple oscillation
-        data.ctrl[:] = math.pi/4*math.sin(math.pi/2+i/100*math.pi)
+        data.ctrl[:] = math.pi/4*math.sin(omega*i)
         i += 1
         
         # Forward step
@@ -95,6 +113,12 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         for idx, id in enumerate(robot_ids):
             orientation[idx] = quaternion_to_matrix(data.xquat[id])
         
+        # Get position
+        pos = data.xpos[colony_id] - init_pos
+        position['x'].append(pos[0])
+        position['y'].append(pos[1])
+        position['z'].append(pos[2])
+        
         # Get force
         sensor_vals = np.array(data.sensordata)
         for idx, id in enumerate(sensor_ids):
@@ -106,10 +130,19 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
                     elem.append(f[n])
         
         # Rendering
-        viewer.sync()
-        time.sleep(step)
+        # viewer.sync()
+        # time.sleep(step)
 
-        if i > 500:
+        if i > int(sim_time/step):
+            mass = model.body_mass
+            total_mass = mass.sum()
+            motor_paddle_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "r1_motor_paddle")
+            arm_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "r1_flA")
+            paddle_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "r1_paddle")
+            print(f"mass: {total_mass}")
+            print(f"motor arm: {mass[motor_paddle_id] + 2*mass[arm_id]}")
+            print(f"paddle: {mass[paddle_id]}")
+
             # Plot sensor angle - time
             a_motor = [180/math.pi*(i) for i in ang_motor[motor_ids[0]]]
             a_paddle = [180/math.pi*(i) for i in ang_paddle[paddle_ids[0]]]
@@ -122,6 +155,20 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             plt.legend()
             plt.grid(True)
             
+            # Plot position - time
+            px = position['x']
+            py = position['y']
+            pz = position['z']
+            plt.figure()
+            plt.plot(t, px, label="x position")
+            plt.plot(t, py, label="y position")
+            plt.plot(t, pz, label="z position")
+            plt.xlabel("Time [s]")
+            plt.ylabel("position [m]")
+            plt.title("Position vs Time")
+            plt.legend()
+            plt.grid(True)
+
             # Plot force - time
             body_id = sensor_ids[0]
             print(mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_SENSOR, body_id))
@@ -140,29 +187,29 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             plt.show()
             
             # Impulse
-            impulse = np.array([0.0, 0.0, 0.0])
-            v = np.array([0.0, 0.0, 0.0])
-            x = np.array([0.0, 0.0, 0.5])
-            mass = np.sum(model.body_mass)
-            for idx in range(len(fx)):
-                f_vec = np.array([fx[idx], fy[idx], fz[idx]])
-                impulse += step*f_vec
-                a = f_vec/mass
-                v += a*step
-                x += v*step + 0.5*a*step**2
+            # impulse = np.array([0.0, 0.0, 0.0])
+            # v = np.array([0.0, 0.0, 0.0])
+            # x = np.array([0.0, 0.0, 0.5])
+            # mass = np.sum(model.body_mass)
+            # for idx in range(len(fx)):
+            #     f_vec = np.array([fx[idx], fy[idx], fz[idx]])
+            #     impulse += step*f_vec
+            #     a = f_vec/mass
+            #     v += a*step
+            #     x += v*step + 0.5*a*step**2
             
             # Actual position
-            base_id = model.body("colony").id
-            position = np.array([data.xpos[base_id][0], data.xpos[base_id][1], data.xpos[base_id][2]])
+            # base_id = model.body("colony").id
+            # position = np.array([data.xpos[base_id][0], data.xpos[base_id][1], data.xpos[base_id][2]])
 
-            base_twist = data.cvel[base_id]
-            vel = np.array([base_twist[3], base_twist[4], base_twist[5]])
+            # base_twist = data.cvel[base_id]
+            # vel = np.array([base_twist[3], base_twist[4], base_twist[5]])
         
-            print(f"Mass(kg): {mass}")
-            print(f"Impulse(N*t): {impulse}")
-            print(f"Expected position(m): {x}")
-            print(f"Actual position(m): {position}")
-            print(f"Expected velocity(m/s): {impulse/mass}")
-            print(f"Actual velocity(m/s): {vel}")
+            # print(f"Mass(kg): {mass}")
+            # print(f"Impulse(N*t): {impulse}")
+            # print(f"Expected position(m): {x}")
+            # print(f"Actual position(m): {position}")
+            # print(f"Expected velocity(m/s): {impulse/mass}")
+            # print(f"Actual velocity(m/s): {vel}")
             break
 

@@ -1,0 +1,41 @@
+<mujoco model="modular">
+
+  <option timestep="0.001" gravity="0 0 0" integrator="implicit"
+           density="1025" viscosity="0.001" iterations="50" solver="Newton"/>
+  <include file="environment.xml"/>
+
+  <asset>
+    <model name="modbot" file="modular.xml"/>
+  </asset>
+
+  <worldbody>
+    <body name="colony" pos="0 0 0.5">
+      <site name="COM" pos="0 0 0"/>
+      <joint name="base" type="free"/>
+      <geom type="sphere" size="0.01" density="1000" rgba="0 0 0 0" contype="0" conaffinity="0"/>
+      <body name="bot1" pos="0.150000 0.000000 0" quat="0.7071067811865476 0 0 0.7071067811865475">
+        <attach model="modbot" body="main_body" prefix="r1_"/>
+      </body>      <body name="bot2" pos="0.106066 0.106066 0" quat="0.38268343236508984 0 0 0.9238795325112867">
+        <attach model="modbot" body="main_body" prefix="r2_"/>
+      </body>      <body name="bot3" pos="0.000000 0.150000 0" quat="6.123233995736766e-17 0 0 1.0">
+        <attach model="modbot" body="main_body" prefix="r3_"/>
+      </body>      <body name="bot4" pos="-0.106066 0.106066 0" quat="-0.3826834323650897 0 0 0.9238795325112867">
+        <attach model="modbot" body="main_body" prefix="r4_"/>
+      </body>      <body name="bot5" pos="-0.150000 0.000000 0" quat="-0.7071067811865475 0 0 0.7071067811865476">
+        <attach model="modbot" body="main_body" prefix="r5_"/>
+      </body>      <body name="bot6" pos="-0.106066 -0.106066 0" quat="0.9238795325112866 0 0 -0.38268343236508995">
+        <attach model="modbot" body="main_body" prefix="r6_"/>
+      </body>      <body name="bot7" pos="-0.000000 -0.150000 0" quat="1.0 0 0 -1.1102230246251565e-16">
+        <attach model="modbot" body="main_body" prefix="r7_"/>
+      </body>      <body name="bot8" pos="0.106066 -0.106066 0" quat="0.9238795325112868 0 0 0.3826834323650896">
+        <attach model="modbot" body="main_body" prefix="r8_"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <sensor>
+    <force  name="colony_force"  site="COM"/>
+    <torque name="colony_torque" site="COM"/>
+  </sensor>
+
+</mujoco>

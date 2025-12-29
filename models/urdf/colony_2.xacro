@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="colony" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="module.xacro"/>
+  <link name="colony_base"/>
+	<xacro:module_instance prefix="r1_" parent="colony_base" xyz="0.15 0 0" rpy="0 -1.5707963 1.5708"/>
+	<xacro:module_instance prefix="r2_" parent="colony_base" xyz="-0.15 1.83697e-17 0" rpy="0 -1.5707963 4.71239"/>
+
+</robot>

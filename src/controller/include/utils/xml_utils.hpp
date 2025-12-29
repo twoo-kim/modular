@@ -2,6 +2,9 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
+#include <cstdlib>
+#include <stdexcept>
 #include <string>
 #include "data/config.hpp"
 
@@ -14,7 +17,7 @@ inline std::string yaw2quat(double yaw) {
   return quat.str();
 }
 
-// Generate xml file that composed of colony
+// Generate MCJF file that makes colony
 inline std::filesystem::path generateColonyXML(SimConfig &cfg) {
   const int n = cfg.N;
   const double radius = cfg.radius;
@@ -56,9 +59,13 @@ inline std::filesystem::path generateColonyXML(SimConfig &cfg) {
   }
   
   // Total XML
+  std::string integrator = (cfg.isEuler) ? "Euler" : "RK4";
   std::ostringstream xml;
-  xml << R"(<mujoco model="modular">
-  <option timestep="0.001" gravity="0 0 0" integrator="implicit" density="1025" viscosity="0.001" iterations="50" solver="Newton"/>
+  xml << "<mujoco model=\"modular\">\n"
+      << "\t<option timestep=\"" << cfg.dt << "\" gravity=\"0 0 0\""
+      << " integrator=\"" << integrator << "\" density=\"" << cfg.rho
+      << "\" viscosity=\"" << cfg.viscosity << "\" iterations=\"50\" solver=\"Newton\"/>\n"
+      << R"(
   <include file="../environment.xml"/>
   <asset>
     <model name="modbot" file="../modular.xml"/>
@@ -81,11 +88,15 @@ inline std::filesystem::path generateColonyXML(SimConfig &cfg) {
 </mujoco>
 )";
 
-  // Store xml file and return
+  // Write xml file and return
   const auto out_path = xml_dir / "colony" / ("test_" + std::to_string(n) + "_circle.xml");
   std::ofstream ofs(out_path);
+  if (!ofs) {
+    throw std::runtime_error("Failed to write xml file");
+  }
   ofs << xml.str();
   ofs.close();
 
   return out_path;
 }
+

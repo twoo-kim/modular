@@ -23,7 +23,7 @@
               contype="2" conaffinity="1"/>
         <!-- Paddle Arm -->
         <body name="motor_paddle" pos="0.008 0.035 0" quat="-0.5 -0.5 -0.5 0.5" gravcomp="0.95">
-          <joint name="motor_hinge" pos="0 0 0" axis= "0 0 -1" range="-0.7854 0.7854" limited="true"/>
+          <joint name="motor_hinge" pos="0 0 0" axis= "0 0 1" range="-0.7854 0.7854" limited="true"/>
           <geom class="PLA" type="mesh" mesh="motor_paddle" rgba=".1 .1 .1 1"
                 contype="2" conaffinity="1"/>
           <!-- Arm -->
@@ -37,12 +37,13 @@
           </body>
           <!-- Paddle -->
           <body name="paddle" pos="-0.0335 0.0015 0" quat="0.5555702 0 0 0.8314696" gravcomp="0.95">
+            <!-- <joint name="paddle_hinge" pos="0 0 0" axis= "0 0 1" range="-0.3927 0.3927" limited="true"/> -->
             <joint  name="paddle_hinge" pos="0 0 0" axis= "0 0 1" range="-0.3927 0.3927" limited="true"
                     solreflimit="1e-3 1" solimplimit=".95 .99 1e-3"/>
-            <geom class="PLA" type="mesh" mesh="paddle" rgba="0.02 0.5 0.46 1"
-                  contype="2" conaffinity="1" fluidshape="ellipsoid" fluidcoef="1.0 0.5 1.5 1.7 1.0"/>
             <!-- <geom class="PLA" type="mesh" mesh="paddle" rgba="0.02 0.5 0.46 1"
-                  contype="2" conaffinity="1"/> -->
+                  contype="2" conaffinity="1" fluidshape="ellipsoid" fluidcoef="1.0 0.5 1.5 1.7 1.0"/> -->
+            <geom class="PLA" type="mesh" mesh="paddle" rgba="0.02 0.5 0.46 1"
+                  contype="2" conaffinity="1"/>
           </body>
         </body>
       </body>
@@ -57,7 +58,7 @@
 
   <!-- Control -->
   <actuator>
-    <position name="motor" joint="motor_hinge" kp="10" kv=".05"/>
+    <motor name="motor_tau" joint="motor_hinge" gear="1" ctrlrange="-2 2" ctrllimited="true"/>
   </actuator>
 
 </mujoco>
