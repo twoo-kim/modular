@@ -25,21 +25,25 @@ public:
   Eigen::VectorXd getState();
   Eigen::Vector3d getForce();
   std::vector<Eigen::VectorXcd> computeResponse(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
-  
+  std::vector<Eigen::VectorXcd> computeMuJoCoResponse(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
+
   // Update actuator
   void setAmplitude(const double &amp) { t_ = 0.0; amp_ = amp; }
   void setFrequency(const double &freq) { t_ = 0.0; freq_ = freq; };
 
-  int nq, nv, nx, ndx, nu;  // Dimension
+  int nq, nv, nx, ndx, nu, na;  // Dimension
+  double amp_, freq_;           // Amplitude and frequency for actuator
+  double t_;                    // Simulation time
 
 private:
   // Compute actuator control input
   void computeControl(const double &t);
 
   // Check and copy Eigen into mujoco data
+  void setEvalState(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &ctrl);
   void setEvalState(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
-  void copyQpos(const Eigen::VectorXd &q);
-  void copyQvel(const Eigen::VectorXd &dq);
+  Eigen::VectorXd getGeneralizedForce(int id, double ctrl_value, const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
+
 
   // Dynamics
   Eigen::MatrixXd computeMass(const Eigen::VectorXd &q);
@@ -48,9 +52,6 @@ private:
 
   // Integrate with small perturbation
   Eigen::VectorXd integrate(const Eigen::VectorXd &q, int k, double eps);
-
-  double amp_, freq_;       // Amplitude and frequency for actuator
-  double t_;                // Simulation time
 
   // Configuration
   SimConfig config_;

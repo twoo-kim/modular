@@ -21,12 +21,12 @@ KAPPA:            0.5               # κ: Sensor coefficient gain
 MIN_DELPHI:       0.1               # Lower limit for φ̇ (to prevent stopping)
 HEADLESS:         false
 
-SIM_TIME:         4
+SIM_TIME:         10
 TIME_STEP:        0.001             # One time step length 0.001s
 # =========================
 
 # Fluid dynamic coefficients
-Cn:               1.5
+Cn:               0.0
 rho:              1025
 viscosity:        0.001
 
@@ -34,6 +34,9 @@ viscosity:        0.001
 P_gain:           1
 D_gain:           0.01
 
+# Is colony fixed
+isFixed:          false
+
 # for integration method; if false, use RK4 method
-isEuler:          false
+isEuler:          true
 

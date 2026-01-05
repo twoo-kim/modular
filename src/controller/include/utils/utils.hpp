@@ -15,6 +15,16 @@ inline Eigen::VectorXd toEigen(const mjtNum *arr, int n) {
   return v;
 }
 
+inline Eigen::MatrixXd toEigen(const mjtNum *A, int rows, int cols) {
+  Eigen::MatrixXd M(rows, cols);
+  for (int r = 0; r < rows; ++r) {
+    for (int c = 0; c < cols; ++c) {
+      M(r, c) = static_cast<double>(A[r*cols + c]);
+    }
+  }
+  return M;
+}
+
 inline void toMj(const Eigen::VectorXd &v, mjtNum *arr) {
   const int n = v.size();
   for (int i = 0; i < n; ++i) {

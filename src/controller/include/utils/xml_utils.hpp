@@ -73,8 +73,10 @@ inline std::filesystem::path generateColonyXML(SimConfig &cfg) {
   <worldbody>
     <body name="colony" pos="0 0 0.5">
     <site name="COM" pos="0 0 0"/>
-    <joint name="base" type="free"/>
 )";
+  if (!cfg.isFixed) {
+    xml << "\t\t<joint name=\"base\" type=\"free\"/>\n";
+  }
   xml << dummy;
   xml << bots.str();
   xml << R"(

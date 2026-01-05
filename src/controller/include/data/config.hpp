@@ -19,7 +19,8 @@ struct SimConfig {
 
   double sim_time;                // Simulation time
   double dt;                      // Unit time step
-  std::vector<bool> isActivate;    // Check which module actuator to activate
+  bool isFixed;                   // Is colony fixed
+  std::vector<bool> isActivate;   // Check which module actuator to activate
 
   double kp, kd;                  // PD gain for actuator controller
   double cn, rho, viscosity;      // Fluid dynamics coefficients

@@ -1,5 +1,5 @@
 <mujoco model="modular">
-	<option timestep="0.001" gravity="0 0 0" integrator="RK4" density="1025" viscosity="0.001" iterations="50" solver="Newton"/>
+	<option timestep="0.001" gravity="0 0 0" integrator="Euler" density="1025" viscosity="0.001" iterations="50" solver="Newton"/>
 
   <include file="../environment.xml"/>
   <asset>
@@ -8,7 +8,7 @@
   <worldbody>
     <body name="colony" pos="0 0 0.5">
     <site name="COM" pos="0 0 0"/>
-    <joint name="base" type="free"/>
+		<joint name="base" type="free"/>
 		<body name="bot1" pos="0.05 0 0" quat="0.707107 0 0 0.707107">
 			<attach model="modbot" body="main_body" prefix="r1_"/>
 		</body>

@@ -18,6 +18,7 @@ SimConfig SimConfig::load(const std::string &path) {
 
   config.sim_time = file["SIM_TIME"].as<double>();
   config.dt = file["TIME_STEP"].as<double>();
+  config.isFixed = file["isFixed"].as<bool>();
   config.isActivate = file["is_activate"].as<std::vector<bool>>();
   
   config.kp = file["P_gain"].as<double>();

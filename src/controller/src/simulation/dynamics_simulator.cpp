@@ -24,7 +24,7 @@ DynamicsSimulator::DynamicsSimulator(SimConfig &config)
   }
 
   nq = model_->nq;  nv = model_->nv;  nu = model_->nu;
-  nx = nq + nv;     ndx = 2*nv;
+  nx = nq + nv;     na = model_->na;  ndx = 2*nv + na;
 }
 
 DynamicsSimulator::~DynamicsSimulator() {
@@ -43,7 +43,8 @@ Eigen::VectorXd DynamicsSimulator::getState() {
 Eigen::Vector3d DynamicsSimulator::getForce() {
   // Get force applied on the colony center
   int sid = mj_name2id(model_, mjOBJ_SENSOR, "colony_force");
-  Eigen::Vector3d F = Eigen::Vector3d(data_->sensordata[sid + 0], data_->sensordata[sid + 1], data_->sensordata[sid + 2]);
+  int adr = model_->sensor_adr[sid];
+  Eigen::Vector3d F = Eigen::Vector3d(data_->sensordata[adr + 0], data_->sensordata[adr + 1], data_->sensordata[adr + 2]);
   return F;
 }
 
@@ -69,8 +70,10 @@ void DynamicsSimulator::computeControl(const double &t) {
   const double omega = 2*M_PI*freq_;
 
   for (int i = 0; i < config_.N; ++i) {
-    const double phi = q(7+2*i);
-    const double dphi = dq(6+2*i);
+    if (!config_.isActivate[i]) continue;
+    int j = (!config_.isFixed) ? 6 + 2*i : 2*i;
+    const double phi = (!config_.isFixed) ? q(j+1) : q(j);
+    const double dphi = dq(j);
     double desired_pos = amp_ * std::sin(omega*t);
     double ma = config_.kp * (desired_pos - phi) - config_.kd * dphi;
     data_->ctrl[i] = ma;
@@ -82,10 +85,18 @@ Eigen::MatrixXd DynamicsSimulator::computeMass(const Eigen::VectorXd &q) {
   setEvalState(q, Eigen::VectorXd::Zero(nv));
   mj_forward(model_, eval_);
 
+  // Get mass matrix
+  Eigen::MatrixXd M(nv, nv);  M.setZero();
+
   // Make full matrix
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> M(nv, nv);
-  mj_fullM(model_, M.data(), eval_->qM);
-  return Eigen::MatrixXd(M);
+  std::vector<mjtNum> Mfull(nv*nv);
+  mj_fullM(model_, Mfull.data(), eval_->qM);
+  for (int r = 0; r < nv; ++r) {
+    for (int c = 0; c < nv; ++c) {
+      M(r, c) = static_cast<double>(Mfull[r*nv + c]);
+    }
+  }
+  return M;
 }
 
 Eigen::VectorXd DynamicsSimulator::computeCoriolis(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) {
@@ -94,11 +105,7 @@ Eigen::VectorXd DynamicsSimulator::computeCoriolis(const Eigen::VectorXd &q, con
   mj_forward(model_, eval_);
 
   // Get bias
-  Eigen::VectorXd c(nv);
-  for (int i = 0; i < nv; ++i) {
-    c[i] = static_cast<double>(eval_->qfrc_bias[i]);
-  }
-  return c;
+  return toEigen(eval_->qfrc_bias, nv);
 }
 
 Eigen::VectorXd DynamicsSimulator::computeBias(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) {
@@ -107,35 +114,49 @@ Eigen::VectorXd DynamicsSimulator::computeBias(const Eigen::VectorXd &q, const E
   mj_forward(model_, eval_);
 
   // Get bias
-  Eigen::VectorXd b(nv);
-  for (int i = 0; i < nv; ++i) {
-    const mjtNum coriolis = eval_->qfrc_bias[i];    // coriolis
-    const mjtNum passive = eval_->qfrc_passive[i];  // spring, damper, gravity, fluid
-    b[i] = static_cast<double>(coriolis + passive);
-  }
-  return b;
+  Eigen::VectorXd bias = toEigen(eval_->qfrc_bias, nv);
+  Eigen::VectorXd passive = toEigen(eval_->qfrc_passive, nv);
+  // Eigen::VectorXd constraint = toEigen(eval_->qfrc_constraint, nv);
+  return bias + passive;
 }
 
 Eigen::VectorXd DynamicsSimulator::integrate(const Eigen::VectorXd &q, int k, double eps) {
-  Eigen::VectorXd v = Eigen::VectorXd::Zero(nv);
-  v[k] = eps;
-
   // Copy configuration
-  copyQpos(q); copyQvel(v);
+  toMj(q, eval_->qpos);
 
-  // integrate along tangent direction k
-  mj_integratePos(model_, eval_->qpos, eval_->qvel, 1.0);
-  Eigen::VectorXd out = toEigen(eval_->qpos, nq);
-  return out;
+  // Set unit tangent velocity
+  Eigen::VectorXd v = Eigen::VectorXd::Zero(nv);
+  v[k] = 1.0;
+  toMj(v, eval_->qvel);
+
+  // integrate by epsilon
+  mj_integratePos(model_, eval_->qpos, eval_->qvel, eps);
+  return toEigen(eval_->qpos, nq);
+}
+
+Eigen::VectorXd DynamicsSimulator::getGeneralizedForce(int id, double ctrl_value, const Eigen::VectorXd &q, const Eigen::VectorXd &dq) {
+  setEvalState(q, dq);
+
+  // Baseline
+  mj_forward(model_, eval_);
+  Eigen::VectorXd tau0 = toEigen(eval_->qfrc_actuator, nv);
+
+  // Perturbed
+  setEvalState(q, dq);
+  eval_->ctrl[id] = ctrl_value;
+  mj_forward(model_, eval_);
+  Eigen::VectorXd tau1 = toEigen(eval_->qfrc_actuator, nv);
+
+  // std::cout << "gen f:\t" << (tau1-tau0).transpose() << std::endl;
+  return (tau1 - tau0);
 }
 
 std::vector<Eigen::VectorXcd> DynamicsSimulator::computeResponse(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) {
-// Compute temporary mass matrix
+  // Compute temporary mass matrix
   Eigen::MatrixXd M0 = computeMass(q);
 
-  // Compute the jacobian of the coriolis hydro; V - tau
-  Eigen::MatrixXd C0 = Eigen::MatrixXd::Zero(nv, nv);
-  Eigen::MatrixXd K0 = Eigen::MatrixXd::Zero(nv, nv);
+  // Compute the jacobian of the coriolis hydro; V - tau_fluid
+  Eigen::MatrixXd C0(nv, nv), K0(nv, nv);
   
   const double epsilon = 1e-6;
   for (int k = 0; k < nv; k++) {
@@ -157,6 +178,16 @@ std::vector<Eigen::VectorXcd> DynamicsSimulator::computeResponse(const Eigen::Ve
   // std::cout << "C0\n" << C0 << std::endl;
   // std::cout << "K0\n" << K0 << std::endl;
 
+  // PD control matrix
+  Eigen::MatrixXd Kp = Eigen::MatrixXd::Zero(nv, nv);
+  Eigen::MatrixXd Kd = Eigen::MatrixXd::Zero(nv, nv);
+  for (int i = 0; i < config_.N; ++i) {
+    if (!config_.isActivate[i]) continue;
+    int j = (!config_.isFixed) ? 6 + 2*i : 2*i;
+    Kp(j, j) = config_.kp;
+    Kd(j, j) = config_.kd;
+  }
+
   // Currently only consider a single actuator input(by symmetry)
   std::vector<Eigen::VectorXcd> response;
   for (int i = 0; i < config_.N; ++i) {
@@ -166,39 +197,99 @@ std::vector<Eigen::VectorXcd> DynamicsSimulator::computeResponse(const Eigen::Ve
     Eigen::MatrixXcd temp, G;
     u_hat = Eigen::VectorXcd::Zero(nv);
     if (config_.isActivate[i]) {
-      u_hat(6+2*i) = data_->ctrl[i];
+      int j = (!config_.isFixed) ? 6 + 2*i : 2*i;
+      u_hat(j) = -1.0i*amp_;
     }
-    temp = -w*w*M0 + 1.0i*w*C0 + K0;
+    temp = -w*w*M0 + 1.0i*w*(C0+Kd) + (K0+Kp);
     // temp += config_.reg * Eigen::MatrixXcd::Identity(nv, nv);
     
     G = temp.inverse();
-    q_hat.noalias() = G*u_hat;
+    q_hat.noalias() = G*Kp*u_hat;
     response.push_back(q_hat);
   }
 
   return response;
 }
 
-void DynamicsSimulator::setEvalState(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) {
-  copyQpos(q); copyQvel(dq);
+std::vector<Eigen::VectorXcd> DynamicsSimulator::computeMuJoCoResponse(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) {
+  // Set eval state
+  Eigen::VectorXd ctrl = toEigen(data_->ctrl, nu);
+  setEvalState(q, dq, ctrl);
 
-  mju_zero(eval_->ctrl, model_->nu);
+  // Run forward step for evaluation
+  mj_forward(model_, eval_);
+  
+  // Decrease iteration
+  const int prev_iter = model_->opt.iterations;
+  model_->opt.iterations = 5;
+
+  // Linearize MuJoCo step dx_{k+1} = A dx_k + B du_k
+  std::vector<mjtNum> A_raw(ndx * ndx);
+  std::vector<mjtNum> B_raw(ndx * nu);
+  mjd_transitionFD(model_, eval_, 1e-6, 0, A_raw.data(), B_raw.data(), nullptr, nullptr);
+  
+  const Eigen::MatrixXd A = toEigen(A_raw.data(), ndx, ndx);
+  const Eigen::MatrixXd B = toEigen(B_raw.data(), ndx, nu);
+  
+  // Restore iteration
+  model_->opt.iterations = prev_iter;
+  
+  // PD controller gains; du = Ku*ddesired - Kx*dx
+  Eigen::MatrixXd Kx = Eigen::MatrixXd::Zero(nu, ndx);
+  Eigen::MatrixXd Ku = Eigen::MatrixXd::Zero(nu, nu);
+  for (int i = 0; i < config_.N; ++i) {
+    if (!config_.isActivate[i]) continue;
+    int j = (!config_.isFixed) ? 6 + 2*i : 2*i;
+    Ku(i, i) = config_.kp;
+    Kx(i, j) = config_.kp;
+    Kx(i, nv+j) = config_.kd;
+  }
+
+  const Eigen::MatrixXd Acl = A - B * Kx;
+  const Eigen::MatrixXd Bcl = B * Ku;
+
+  // Get frequency response
+  const double dt = config_.dt;
+  const double omega = 2.0*M_PI*freq_;
+  const double Omega = omega*dt;
+  const std::complex<double> z = std::exp(1.0i*Omega);
+
+  Eigen::MatrixXcd inv = z * Eigen::MatrixXcd::Identity(ndx, ndx);
+  inv -= Acl.cast<std::complex<double>>();
+  Eigen::PartialPivLU<Eigen::MatrixXcd> lu(inv);
+
+  std::vector<Eigen::VectorXcd> response;
+  for (int i = 0; i < config_.N; ++i) {
+    Eigen::VectorXcd u_hat = Eigen::VectorXcd::Zero(nu);;
+
+    // Control input; desired pose
+    if (config_.isActivate[i]) {
+      // int j = (!config_.isFixed) ? 6 + 2*i : 2*i;
+      u_hat(i) = -1.0i*1e-6;
+    }
+    
+    // Solve
+    const Eigen::VectorXcd rhs = (Bcl * u_hat);
+    Eigen::VectorXcd x_hat = lu.solve(rhs);
+
+    // Get q_hat
+    Eigen::VectorXcd q_hat = x_hat.head(nv);
+    response.push_back(q_hat);
+  }
+
+  return response;
+}
+
+void DynamicsSimulator::setEvalState(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &ctrl) {
+  toMj(q, eval_->qpos);
+  toMj(dq, eval_->qvel);
+  toMj(ctrl, eval_->ctrl);
+
   mju_zero(eval_->qfrc_applied, model_->nv);
   mju_zero(eval_->xfrc_applied, 6 * model_->nbody);
 }
 
-void DynamicsSimulator::copyQpos(const Eigen::VectorXd &q) {
-  // Check size of the vector
-  if (q.size() != nq) throw std::runtime_error("q size != model.nq");
-
-  // Copy into mujoco data
-  toMj(q, eval_->qpos);
-}
-
-void DynamicsSimulator::copyQvel(const Eigen::VectorXd &dq) {
-  // Check size of the vector
-  if (dq.size() != nv) throw std::runtime_error("dq size != model.nv");
-
-  // Copy into mujoco data
-  toMj(dq, eval_->qvel);
+void DynamicsSimulator::setEvalState(const Eigen::VectorXd &q, const Eigen::VectorXd &dq) {
+  const Eigen::VectorXd ctrl = Eigen::VectorXd::Zero(nu);
+  setEvalState(q, dq, ctrl);
 }
