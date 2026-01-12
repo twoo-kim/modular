@@ -9,6 +9,7 @@
 
 #include "simulation/viewer.hpp"
 #include "data/config.hpp"
+#include "data/ltv.hpp"
 #include "utils/utils.hpp"
 #include "utils/xml_utils.hpp"
 using namespace std::complex_literals;
@@ -26,7 +27,8 @@ public:
   Eigen::Vector3d getForce();
   std::vector<Eigen::VectorXcd> computeResponse(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
   std::vector<Eigen::VectorXcd> computeMuJoCoResponse(const Eigen::VectorXd &q, const Eigen::VectorXd &dq);
-
+  Eigen::VectorXcd computeHTF();
+  
   // Update actuator
   void setAmplitude(const double &amp) { t_ = 0.0; amp_ = amp; }
   void setFrequency(const double &freq) { t_ = 0.0; freq_ = freq; };
@@ -34,6 +36,9 @@ public:
   int nq, nv, nx, ndx, nu, na;  // Dimension
   double amp_, freq_;           // Amplitude and frequency for actuator
   double t_;                    // Simulation time
+  
+  // Store LTV matrices
+  std::vector<LTVData> ltv_;
 
 private:
   // Compute actuator control input

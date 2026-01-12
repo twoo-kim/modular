@@ -1,5 +1,5 @@
 <mujoco model="modular">
-	<option timestep="0.001" gravity="0 0 0" integrator="RK4" density="1025" viscosity="0.001" iterations="50" solver="Newton"/>
+	<option timestep="0.001" gravity="0 0 0" integrator="Euler" density="1025" viscosity="0.001" iterations="50" solver="Newton"/>
 
   <include file="../environment.xml"/>
   <asset>

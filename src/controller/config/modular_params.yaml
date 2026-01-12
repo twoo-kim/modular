@@ -11,7 +11,7 @@ visualize:        false
 is_activate:      [true, true, true, true]
 
 # ===== Colony settings ====
-N:                2                 # Number of agents/bots
+N:                4                 # Number of agents/bots
 RADIUS:           0.05              # [m] Radius of the circle (agents placed at equal intervals)
 FACE_RADIAL:      true              # True: Agents face outwards (radial direction)
 YAW_OFFSET_DEG:   0.0               # Fine adjustment of yaw for all agents (degrees)
@@ -40,3 +40,8 @@ isFixed:          false
 # for integration method; if false, use RK4 method
 isEuler:          true
 
+#=========== LTP Analysis ============
+harmonics:        20                # number of harmonics order to look over
+sampling_f:       1000              # Sampling frequency of candidate for DFT
+
+phase_gap:        [0.0, 0.0]     # 0, pi/6, pi/3, pi/2, 2pi/3, 5pi/6, pi, ...

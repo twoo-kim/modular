@@ -25,6 +25,12 @@ struct SimConfig {
   double kp, kd;                  // PD gain for actuator controller
   double cn, rho, viscosity;      // Fluid dynamics coefficients
   bool isEuler;                   // Use Euler if true, and RK4 for false
+
+  int harmonics;                  // Number of harmonic elements
+  double fs;                      // Sampling frequency
+
+  std::vector<double> phase_gap;  // Phase gap between modules
+
   static SimConfig load(const std::string &path);
   void printData();
 };

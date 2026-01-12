@@ -74,7 +74,7 @@ void DynamicsSimulator::computeControl(const double &t) {
     int j = (!config_.isFixed) ? 6 + 2*i : 2*i;
     const double phi = (!config_.isFixed) ? q(j+1) : q(j);
     const double dphi = dq(j);
-    double desired_pos = amp_ * std::sin(omega*t);
+    double desired_pos = amp_ * std::sin(omega*t - config_.phase_gap[i]);
     double ma = config_.kp * (desired_pos - phi) - config_.kd * dphi;
     data_->ctrl[i] = ma;
   }
@@ -248,6 +248,11 @@ std::vector<Eigen::VectorXcd> DynamicsSimulator::computeMuJoCoResponse(const Eig
   const Eigen::MatrixXd Acl = A - B * Kx;
   const Eigen::MatrixXd Bcl = B * Ku;
 
+  LTVData ltv(Acl, Bcl, t_);
+  ltv_.push_back(ltv);
+  // std::cout << "A(" << t_ << ")\n" << Acl << std::endl;
+  // std::cout << "B(" << t_ << ")\n" << Bcl << std::endl;
+
   // Get frequency response
   const double dt = config_.dt;
   const double omega = 2.0*M_PI*freq_;
@@ -279,6 +284,78 @@ std::vector<Eigen::VectorXcd> DynamicsSimulator::computeMuJoCoResponse(const Eig
 
   return response;
 }
+
+Eigen::VectorXcd DynamicsSimulator::computeHTF() {
+  const double T = 1.0/freq_;
+  const double fs = config_.fs;
+  const double omega = 2*M_PI*freq_;
+  const int start = static_cast<int>(2.0/config_.dt);
+  const int step = static_cast<int>(std::lround((1.0/fs)/config_.dt));
+  const int K = static_cast<int>(std::lround(T*fs));
+  const int N = config_.harmonics;
+  const int H = 2*N+1;
+
+  // Fourier coefficients
+  std::vector<Eigen::MatrixXcd> A_fourier, B_fourier;
+  for (int k = -K/2; k < K/2; ++k) {
+    Eigen::MatrixXcd Ak = Eigen::MatrixXcd::Zero(ndx, ndx);
+    Eigen::MatrixXcd Bk = Eigen::MatrixXcd::Zero(ndx, nu);
+    for (int n = 0; n < K; ++n) {
+      auto data = ltv_[start + n*step];
+      const double w = 2.0*M_PI/K*k*n;
+      std::complex<double> Wk = std::exp(-1.0i*w);
+      
+      Ak += data.A*Wk;
+      Bk += data.B*Wk;
+    }
+    Ak /= static_cast<double>(K);
+    Bk /= static_cast<double>(K);
+    A_fourier.push_back(Ak);
+    B_fourier.push_back(Bk);
+  }
+  
+  // If N > K/2, cannot build harmonic transfer function
+  std::cout << "harmonic order: " << N << "\tK/2: " << K/2 << std::endl;
+  
+  // Build harmonic transfer function
+  // i,j block of the toeplitz form matrix is A_{i-j}
+  Eigen::MatrixXcd A_toeplitz = Eigen::MatrixXcd::Zero(ndx*H, ndx*H);
+  Eigen::MatrixXcd B_toeplitz = Eigen::MatrixXcd::Zero(ndx*H, nu*H);
+  
+  for (int i = 0; i < 2*N+1; ++i) {
+    for (int j = 0; j < 2*N+1; ++j) {
+      Eigen::MatrixXcd Aij(ndx, ndx), Bij(ndx, nu);
+      Aij = A_fourier[K/2 + i-j];
+      Bij = B_fourier[K/2 + i-j];
+
+      A_toeplitz.block(ndx*i, ndx*j, ndx,ndx) = Aij;
+      B_toeplitz.block(ndx*i, nu*j, ndx,nu) = Bij;
+    }
+  }
+
+  // LU for inverse computation
+  Eigen::MatrixXcd S = Eigen::MatrixXcd::Zero(ndx*H, ndx*H);
+  for (int d = -N; d <= N; ++d) {
+    int idx = d + N;
+    std::complex<double> sn(0.0, omega+d*omega);
+    S.block(ndx*idx, ndx*idx, ndx, ndx) = sn*Eigen::MatrixXcd::Identity(ndx, ndx);
+  }
+  Eigen::MatrixXcd M = S - A_toeplitz;
+  Eigen::PartialPivLU<Eigen::MatrixXcd> lu(M);
+
+  // Input: harmonic 0 to module 0
+  Eigen::VectorXcd u_hat = Eigen::VectorXcd::Zero(nu*H);
+  u_hat(nu*(N-2)) = 0.5i*amp_;
+  u_hat(nu*N) = -0.5i*amp_;
+
+  Eigen::VectorXcd x_hat = lu.solve(B_toeplitz * u_hat);
+  Eigen::MatrixXcd C = Eigen::MatrixXcd::Zero(nv*H, ndx*H);
+  for (int c = 0; c < H; ++c) {
+    C.block(nv*c, ndx*c, nv,nv) = Eigen::MatrixXcd::Identity(nv, nv);
+  }
+  return C*x_hat;
+}
+
 
 void DynamicsSimulator::setEvalState(const Eigen::VectorXd &q, const Eigen::VectorXd &dq, const Eigen::VectorXd &ctrl) {
   toMj(q, eval_->qpos);

@@ -27,7 +27,12 @@ SimConfig SimConfig::load(const std::string &path) {
   config.rho = file["rho"].as<double>();
   config.viscosity = file["viscosity"].as<double>();
   config.isEuler = file["isEuler"].as<bool>();
+  
+  config.harmonics = file["harmonics"].as<int>();
+  config.fs = file["sampling_f"].as<double>();
 
+  config.phase_gap = file["phase_gap"].as<std::vector<double>>();
+  
   return config;
 }
 
