@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
   // Set amplitude
   std::vector<double> amplitude;
   for (int n = 0; n < n_amp; n++) {
-    double amp = 45.0 + 10.0*static_cast<double>(n);
+    double amp = 30.0 + 10.0*static_cast<double>(n);
     amplitude.push_back(amp);
   }
 
@@ -235,15 +235,15 @@ int main(int argc, char** argv) {
 
   //------------------------ Plot --------------------------//
   // JOINT plot
-  // plt::figure_size(1200, 800);
-  // plt::named_plot("module0 active", t, Q[0][0][0]);
-  // plt::named_plot("module0 passive", t, Q[0][0][1]);
-  // plt::named_plot("module1 active", t, Q[0][0][2]);
-  // plt::named_plot("module1 passive", t, Q[0][0][3]);
-  // plt::title("Joint Angle-Time");
-  // plt::xlabel("Time (s)");
-  // plt::ylabel("Angle (rad)");
-  // plt::legend();
+  plt::figure_size(1200, 800);
+  plt::named_plot("module0 active", t, Q[0][0][0]);
+  plt::named_plot("module0 passive", t, Q[0][0][1]);
+  plt::named_plot("module1 active", t, Q[0][0][2]);
+  plt::named_plot("module1 passive", t, Q[0][0][3]);
+  plt::title("Joint Angle-Time");
+  plt::xlabel("Time (s)");
+  plt::ylabel("Angle (rad)");
+  plt::legend();
   // plt::show();
 
   // RESPONSE plot
@@ -272,21 +272,21 @@ int main(int argc, char** argv) {
   // plt::legend();
 
   // PERIODICITY plot
-  // plt::figure_size(1200, 800);
+  plt::figure_size(1200, 800);
   // plt::named_plot("A(2), A(t) cosine similarity", ltv_time, A_horizon);
   // plt::named_plot("B(2), B(t) cosine similarity", ltv_time, B_horizon);
-  // plt::named_plot("A(2)-A(t) norm", ltv_time, A_horizon);
-  // plt::named_plot("B(2)-B(t) norm", ltv_time, B_horizon);
-  // plt::title("Matrix norm-Time");
-  // plt::xlabel("Time (s)");
-  // plt::ylabel("Norm");
-  // plt::legend();
+  plt::named_plot("A(2)-A(t) norm", ltv_time, A_horizon);
+  plt::named_plot("B(2)-B(t) norm", ltv_time, B_horizon);
+  plt::title("Matrix norm-Time");
+  plt::xlabel("Time (s)");
+  plt::ylabel("Norm");
+  plt::legend();
 
   // LTP RESPONSE plot
   plt::figure_size(1200, 800);
   plt::named_plot("magnitude module 1", order, LTP_magnitude[1]);
-  plt::named_plot("magnitude module 2", order, LTP_magnitude[2]);
-  plt::named_plot("magnitude module 3", order, LTP_magnitude[3]);
+  // plt::named_plot("magnitude module 2", order, LTP_magnitude[2]);
+  // plt::named_plot("magnitude module 3", order, LTP_magnitude[3]);
   // plt::named_plot("magnitude module 4", order, LTP_magnitude[4]);
   // plt::named_plot("magnitude module 5", order, LTP_magnitude[5]);
   // plt::named_plot("magnitude module 6", order, LTP_magnitude[6]);
@@ -324,11 +324,11 @@ int main(int argc, char** argv) {
   // plt::show();
   
   // FORCE plot
-  // plt::figure_size(1200, 800);
-  // plt::named_plot("z-force", t, f[0][0]);
-  // plt::title("Thrust-Time");
-  // plt::xlabel("Time (s)");
-  // plt::ylabel("Force (N)");
+  plt::figure_size(1200, 800);
+  plt::named_plot("z-force", t, f[0][0]);
+  plt::title("Thrust-Time");
+  plt::xlabel("Time (s)");
+  plt::ylabel("Force (N)");
   plt::show();
 
   // std::cout << "average phase: " << sumVec(phase[0][1]) / static_cast<double>(phase[0][1].size()) << std::endl;

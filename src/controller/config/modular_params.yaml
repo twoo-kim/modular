@@ -11,7 +11,7 @@ visualize:        false
 is_activate:      [true, true, true, true]
 
 # ===== Colony settings ====
-N:                4                 # Number of agents/bots
+N:                2                 # Number of agents/bots
 RADIUS:           0.05              # [m] Radius of the circle (agents placed at equal intervals)
 FACE_RADIAL:      true              # True: Agents face outwards (radial direction)
 YAW_OFFSET_DEG:   0.0               # Fine adjustment of yaw for all agents (degrees)

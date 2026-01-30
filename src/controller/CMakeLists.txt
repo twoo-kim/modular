@@ -112,12 +112,24 @@ target_link_libraries(colony_sim PRIVATE
   Python3::NumPy
 )
 
+# Multi-phase sweep executable
+add_executable(colony_sim_multi src/dynamics_simulation_multi.cpp)
+target_include_directories(colony_sim_multi PRIVATE
+  ${MATPLOTLIB_CPP_DIR}
+)
+target_link_libraries(colony_sim_multi PRIVATE
+  dynamics_library
+  Python3::Python
+  Python3::NumPy
+)
+
 # ------------------------------------------------------------------------------ #
 # Install; locate compiled files into the destination
 install(TARGETS
   ctrl_node
   sim_node
   colony_sim
+  colony_sim_multi
   modular_library
   dynamics_library
   DESTINATION lib/${PROJECT_NAME}

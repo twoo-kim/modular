@@ -1,7 +1,7 @@
 <mujoco model="modular">
 
   <!-- Environment --> 
-  <option timestep="0.001" gravity="0 0 0" integrator="implicit" density="1025" viscosity="0.0009" iterations="50" solver="Newton"/>
+  <option timestep="0.001" gravity="0 0 -9.81" integrator="implicit" density="1025" viscosity="0.0009" iterations="50" solver="Newton"/>
   <include file="environment.xml"/>
   
   <!-- Modular robot asset -->

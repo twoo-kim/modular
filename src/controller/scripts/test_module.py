@@ -25,9 +25,9 @@ i = 0
 #   # print(f"{i:2d}  {name:20s}  pos = {pose}")
 
 # Get initial configuration
-key_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_KEY, "init_pose")
-mujoco.mj_resetDataKeyframe(model, data, key_id)
-mujoco.mj_forward(model, data)
+# key_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_KEY, "init_pose")
+# mujoco.mj_resetDataKeyframe(model, data, key_id)
+# mujoco.mj_forward(model, data)
 
 # Target ids
 robot_ids = []
@@ -35,6 +35,7 @@ motor_ids = []
 paddle_ids = []
 sensor_ids = []
 colony_id = model.body(name="colony").id
+# system_id = model.body(name="force_sensor").id
 
 for j in range(model.nbody):
     name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, j)
@@ -63,8 +64,11 @@ t = []
 step = 0.001
 sim_time = 4.0
 
+# Configuration
+amp = math.pi/6
 freq = 0.5
 omega = 2*math.pi*freq*step
+
 
 def quaternion_to_matrix(q):
     w, x, y, z = q
@@ -80,12 +84,13 @@ def quaternion_to_matrix(q):
 
 # Initial position
 init_pos = data.xpos[colony_id].copy()
+# init_pos = data.xpos[system_id].copy()
 
 ###############################  Run simulation  ###############################
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
         # Control; currently simple oscillation
-        data.ctrl[:] = math.pi/4*math.sin(omega*i)
+        data.ctrl[:] = amp*math.sin(omega*i)
         i += 1
         
         # Forward step
@@ -114,15 +119,15 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             orientation[idx] = quaternion_to_matrix(data.xquat[id])
         
         # Get position
-        pos = data.xpos[colony_id] - init_pos
-        position['x'].append(pos[0])
-        position['y'].append(pos[1])
-        position['z'].append(pos[2])
+        # pos = data.xpos[colony_id] - init_pos
+        # position['x'].append(pos[0])
+        # position['y'].append(pos[1])
+        # position['z'].append(pos[2])
         
         # Get force
         sensor_vals = np.array(data.sensordata)
         for idx, id in enumerate(sensor_ids):
-            f = orientation[idx] @ sensor_vals[3*id:3*id+3]
+            f = sensor_vals[3*id:3*id+3]
             if id not in force:
                 force[id] = {'x':[f[0]], 'y':[f[1]], 'z':[f[2]]}
             else:
@@ -156,18 +161,18 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             plt.grid(True)
             
             # Plot position - time
-            px = position['x']
-            py = position['y']
-            pz = position['z']
-            plt.figure()
-            plt.plot(t, px, label="x position")
-            plt.plot(t, py, label="y position")
-            plt.plot(t, pz, label="z position")
-            plt.xlabel("Time [s]")
-            plt.ylabel("position [m]")
-            plt.title("Position vs Time")
-            plt.legend()
-            plt.grid(True)
+            # px = position['x']
+            # py = position['y']
+            # pz = position['z']
+            # plt.figure()
+            # plt.plot(t, px, label="x position")
+            # plt.plot(t, py, label="y position")
+            # plt.plot(t, pz, label="z position")
+            # plt.xlabel("Time [s]")
+            # plt.ylabel("position [m]")
+            # plt.title("Position vs Time")
+            # plt.legend()
+            # plt.grid(True)
 
             # Plot force - time
             body_id = sensor_ids[0]
